@@ -1,0 +1,5 @@
+1 "Hello World!" 42 5
+2 "There are only 10 types of people in the world: those who understand binary, and those who don't." 12 12
+3 "Code is like humor. When you have to explain it, it’s bad." 2 42
+4 "Software is a great combination of artistry and engineering." 4 1
+5 "It's not a bug, it's a feature." 62 15
