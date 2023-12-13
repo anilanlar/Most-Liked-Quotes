@@ -1,3 +1,5 @@
+package main.java.org.example;
+
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.Semaphore;
@@ -7,11 +9,9 @@ class Server {
     static Semaphore semaphoreVotesFile = new Semaphore(1);
     static Semaphore semaphoreQuotesFile = new Semaphore(1);
 
-    public static void main(String argv[]) throws Exception
-    {
+    public static void main(String argv[]) throws Exception {
         String requestType;
         ServerSocket welcomeSocket = new ServerSocket(8080);
-
 
         while (true) {
             Socket connectionSocket = welcomeSocket.accept();
@@ -27,10 +27,10 @@ class Server {
                 String quotes = Helper.getQuotes();
                 try {
                     outToClient.writeBytes(quotes);
-                outToClient.writeBytes("StatusCode: 200");
-            } catch (Exception e) {
-                outToClient.writeBytes("StatusCode: 401");
-            }
+                    outToClient.writeBytes("StatusCode: 200");
+                } catch (Exception e) {
+                    outToClient.writeBytes("StatusCode: 401");
+                }
             } else if (requestType.compareTo("upvote_quote") == 0) {
                 // get more data from client
                 String quoteID = inFromClient.readLine();
@@ -58,8 +58,7 @@ class Server {
                     outToClient.writeBytes("StatusCode: 404");
                 }
 
-            }
-            else if (requestType.compareTo("sign_up") == 0) {
+            } else if (requestType.compareTo("sign_up") == 0) {
                 // get more data from client
                 String username = inFromClient.readLine();
                 String password = inFromClient.readLine();

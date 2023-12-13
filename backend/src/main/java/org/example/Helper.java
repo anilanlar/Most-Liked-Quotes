@@ -1,3 +1,5 @@
+package main.java.org.example;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -7,9 +9,9 @@ import java.util.Scanner;
 
 public class Helper {
     private static int numOfUsers = 0;
-    private static String quotesFileName = "../database/quotes.txt";
-    private static String usersFileName = "../database/users.txt";
-    private static String votesFileName = "../database/votes.txt";
+    private static String quotesFileName = "./database/quotes.txt";
+    private static String usersFileName = "./database/users.txt";
+    private static String votesFileName = "./database/votes.txt";
 
     protected static boolean checkUserExists(String username) throws InterruptedException {
         try {
