@@ -20,12 +20,17 @@ class Server {
             // read type of the request
             requestType = inFromClient.readLine(); // available types are "get_quotes", "upvote_quote" ,
                                                    // "downvote_quote", "sign_up", "log_in";
+                                                   // "get_votes_by_quote_id"
             // client request is read
             if (requestType.compareTo("get_quotes") == 0) {
                 // return data to client
                 String quotes = Helper.getQuotes();
-                outToClient.writeBytes(quotes);
+                try {
+                    outToClient.writeBytes(quotes);
                 outToClient.writeBytes("StatusCode: 200");
+            } catch (Exception e) {
+                outToClient.writeBytes("StatusCode: 401");
+            }
             } else if (requestType.compareTo("upvote_quote") == 0) {
                 // get more data from client
                 String quoteID = inFromClient.readLine();
@@ -81,7 +86,20 @@ class Server {
                 } catch (Exception e) {
                     outToClient.writeBytes("StatusCode: 401");
                 }
+            } else if (requestType.compareTo("get_votes_by_quote_id") == 0) {
+                // get more data from client
+                String quote_id = inFromClient.readLine();
+                // process data
+                try {
+                    String votes = Helper.getVotesByQuoteId(quote_id);
+                    // return info message
+                    outToClient.writeBytes(votes);
+                    outToClient.writeBytes("StatusCode: 200");
+                } catch (Exception e) {
+                    outToClient.writeBytes("StatusCode: 401");
+                }
             }
+
             outToClient.close();
 
         }

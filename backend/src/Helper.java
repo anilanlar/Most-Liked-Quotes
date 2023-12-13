@@ -242,64 +242,86 @@ public class Helper {
                 if (!checkUserVotedTheQuote(quoteID, userID)) {
                     try {
                         Server.semaphoreQuotesFile.acquire();
-                Scanner in = new Scanner(new File(quotesFileName));
-                ArrayList<String> lines = new ArrayList<>();
-                while (in.hasNext()) {
-                    String line = in.nextLine();
-                    lines.add(line);
-                }
-                in.close();
-                Server.semaphoreQuotesFile.release();
+                        Scanner in = new Scanner(new File(quotesFileName));
+                        ArrayList<String> lines = new ArrayList<>();
+                        while (in.hasNext()) {
+                            String line = in.nextLine();
+                            lines.add(line);
+                        }
+                        in.close();
+                        Server.semaphoreQuotesFile.release();
 
-                Server.semaphoreVotesFile.acquire();
+                        Server.semaphoreVotesFile.acquire();
 
-                FileWriter writerVotes = new FileWriter(votesFileName, true);
-                BufferedWriter bufferedWriterVotes = new BufferedWriter(writerVotes);
-                bufferedWriterVotes.write(userID + " " + quoteID + " " + "U");
-                bufferedWriterVotes.newLine();
-                bufferedWriterVotes.close();
-                writerVotes.close();
+                        FileWriter writerVotes = new FileWriter(votesFileName, true);
+                        BufferedWriter bufferedWriterVotes = new BufferedWriter(writerVotes);
+                        bufferedWriterVotes.write(userID + " " + quoteID + " " + "U");
+                        bufferedWriterVotes.newLine();
+                        bufferedWriterVotes.close();
+                        writerVotes.close();
 
-                Server.semaphoreVotesFile.release();
+                        Server.semaphoreVotesFile.release();
 
-                Server.semaphoreQuotesFile.acquire();
-                FileWriter fileWriter = new FileWriter(quotesFileName);
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-                for (String line : lines) {
-                    String[] params = line.split("\"");
-                    String quote = params[1].trim();
-                    String id = params[0].trim();
-                    String[] votes = params[2].trim().split(" ");
-                    String upvote = votes[0].trim();
-                    String downvote = votes[1].trim();
+                        Server.semaphoreQuotesFile.acquire();
+                        FileWriter fileWriter = new FileWriter(quotesFileName);
+                        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                        for (String line : lines) {
+                            String[] params = line.split("\"");
+                            String quote = params[1].trim();
+                            String id = params[0].trim();
+                            String[] votes = params[2].trim().split(" ");
+                            String upvote = votes[0].trim();
+                            String downvote = votes[1].trim();
 
-                    if (quoteID.compareTo(id) == 0) {
-                        bufferedWriter.write(
-                                id + " \"" + quote + "\" " + String.format("%d", Integer.parseInt(upvote) + 1) + " "
-                                        + downvote);
-                        bufferedWriter.newLine();
-                    } else {
-                        bufferedWriter.write(line);
-                        bufferedWriter.newLine();
+                            if (quoteID.compareTo(id) == 0) {
+                                bufferedWriter.write(
+                                        id + " \"" + quote + "\" " + String.format("%d", Integer.parseInt(upvote) + 1)
+                                                + " "
+                                                + downvote);
+                                bufferedWriter.newLine();
+                            } else {
+                                bufferedWriter.write(line);
+                                bufferedWriter.newLine();
+                            }
+                        }
+
+                        bufferedWriter.close();
+                        Server.semaphoreQuotesFile.release();
+
+                    } catch (IOException e) {
+                        System.out.println(e);
+                        Server.semaphoreVotesFile.release();
+                        Server.semaphoreQuotesFile.release();
                     }
+                } else {
+                    throw new Exception("User has already voted the quote.");
                 }
-
-                bufferedWriter.close();
-                Server.semaphoreQuotesFile.release();
-
-            } catch (IOException e) {
-                System.out.println(e);
-                Server.semaphoreVotesFile.release();
-                Server.semaphoreQuotesFile.release();
+            } else {
+                throw new Exception("Invalid user id.");
             }
         } else {
-            throw new Exception("User has already voted the quote.");
+            throw new Exception("Invalid quote id.");
         }
-    } else {
-        throw new Exception("Invalid user id.");
     }
-} else {
-    throw new Exception("Invalid quote id.");
+
+    protected static String getVotesByQuoteId(String quote_id) throws InterruptedException {
+        String votes = "";
+        try {
+            Server.semaphoreVotesFile.acquire();
+            Scanner in = new Scanner(new File(votesFileName));
+            while (in.hasNext()) {
+                String line = in.nextLine().trim();
+                String[] params = line.split(" ");
+                if (params[1].trim().compareTo(quote_id) == 0) {
+                    votes = votes + params[0].trim() + " " + params[2].trim() + "\n";
+                }
+
+            }
+            in.close();
+        } catch (IOException e) {
+            System.out.println(e);
         }
+        Server.semaphoreVotesFile.release();
+        return votes;
     }
 }
