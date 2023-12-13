@@ -1,12 +1,17 @@
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.Semaphore;
 
 class Server {
+    static Semaphore semaphoreUsersFile = new Semaphore(1);
+    static Semaphore semaphoreVotesFile = new Semaphore(1);
+    static Semaphore semaphoreQuotesFile = new Semaphore(1);
 
     public static void main(String argv[]) throws Exception
     {
         String requestType;
         ServerSocket welcomeSocket = new ServerSocket(8080);
+
 
         while (true) {
             Socket connectionSocket = welcomeSocket.accept();
