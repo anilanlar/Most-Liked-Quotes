@@ -5,48 +5,45 @@ import 'package:most_liked_quotes/View/Components/CustomTextField.dart';
 import 'package:most_liked_quotes/View/Components/LoginButton.dart';
 import 'package:provider/provider.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   bool error = false;
   String errorMessage = "";
 
-  Future<bool> login() async {
-    final auth = Provider.of<Auth>(context, listen: false);
+  Future<bool> signup() async {
     if (usernameController.text.isEmpty || passwordController.text.isEmpty) {
-      error = true;
+      setState(() {
+        error = true;
       errorMessage = "All fields are mandatory!";
+      });
+      
       return false;
     }
     try {
-      setState(() {
-        error = false;
-        errorMessage = "";
-      });
-      await auth.login(usernameController.text, passwordController.text).then((value) => {
-            if (auth.id != "-1")
-              {
-                setState(() {
-                  error = false;
-                  errorMessage = "";
-                })
-              }
-            else
-              {
-                setState(() {
-                  error = true;
-                  errorMessage = "Invalid Credentials";
-                })
-              }
-          });
+      final auth = Provider.of<Auth>(context, listen: false);
+
+      await auth.signup(usernameController.text, passwordController.text);
+
+      if (auth.id != "-1") {
+        setState(() {
+          error = false;
+          errorMessage = "";
+        });
+      } else {
+        setState(() {
+          error = true;
+          errorMessage = auth.error;
+        });
+      }
     } catch (e) {
       setState(() {
         error = true;
@@ -76,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   width: 350,
                   child: Text(
-                    "Log In",
+                    "Sign Up",
                     style: TextStyle(fontSize: 32),
                     textAlign: TextAlign.center,
                   ),
@@ -108,22 +105,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 30,
                 ),
-                LoginButton(
-                  onTap: () async {
-                    if (await login() && mounted) {
+                ElevatedButton(
+                  onPressed: () async {
+                    if (await signup() && mounted) {
                       Navigator.pushNamed(context, '/home');
                     }
                   },
+                  child: Text("Sign Up"),
                 ),
                 Text(error ? errorMessage : ""),
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/signup');
+                      Navigator.pushNamed(context, '/');
                     },
                     child: const Text(
-                      "Don't have an account?",
+                      "Already have an account?",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.blue,
