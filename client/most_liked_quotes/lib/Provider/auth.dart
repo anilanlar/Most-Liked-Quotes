@@ -117,9 +117,11 @@ class Auth with ChangeNotifier {
       return completer.future;
   }
 
-  void logout() {
+  Future<void> logout() {
+    Completer<void> completer = Completer<void>();
     id = "-1";
     username = "";
     notifyListeners();
+    return completer.future;
   }
 }

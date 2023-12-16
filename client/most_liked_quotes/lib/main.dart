@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:most_liked_quotes/Provider/auth.dart';
+import 'package:most_liked_quotes/Provider/quotes.dart';
 import 'package:most_liked_quotes/View/DetailScreen.dart';
 
 
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<Auth>(create: (context) => Auth()),
+        ChangeNotifierProvider<QuotesProvider>(create: (context) => QuotesProvider()),
       ],
       child: Portal(
         child: MaterialApp(

@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:most_liked_quotes/Models/quote.dart';
+import 'package:most_liked_quotes/Provider/quotes.dart';
 import 'package:most_liked_quotes/Utils/GlobalVariables.dart';
 import 'package:most_liked_quotes/View/DetailScreen.dart';
+import 'package:provider/provider.dart';
 
 import '../Utils/Enums.dart';
 
@@ -13,6 +16,44 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<Quote> allQuotes = [];
+  bool isLoading = false;
+  bool error = false;
+  String errorMessage = "";
+
+  bool _isFirstTime = true;
+
+  void getAllQuotes() async {
+    final quotesProvider = Provider.of<QuotesProvider>(context);
+    try {
+      setState(() {
+        error = false;
+        errorMessage = "";
+        isLoading = true;
+      });
+      await quotesProvider.getQuotes();
+
+      setState(() {
+        isLoading = false;
+        allQuotes = quotesProvider.allQuotes;
+      });
+    } catch (e) {
+      setState(() {
+        error = true;
+        errorMessage = "Something went wrong.";
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isFirstTime) {
+      getAllQuotes();
+      _isFirstTime = false;
+    }
+    super.didChangeDependencies();
+  }
+
   void likeQuote() async {}
 
   void dislikeQuote() async {}
@@ -52,14 +93,25 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
       ),
       body: Container(
-        child: ListView.builder(
-            itemCount: dataList.length,
+        child: isLoading?  Container(
+              padding: const EdgeInsets.only(top: 32),
+              decoration: const BoxDecoration(color: Colors.white),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ) :ListView.builder(
+            itemCount: allQuotes.length,
             itemBuilder: (BuildContext context, int index) {
-              String quote = dataList[index]["quote"]!;
-              String author = dataList[index]["author"]!;
-              String likes = dataList[index]["likes"]!.toString();
-              String dislikes = dataList[index]["dislikes"]!.toString();
-              List<Map<String, dynamic>> votes = dataList[index]["votes"]!;
+              String quote = allQuotes[index].content;
+              //String author = dataList[index]["author"]!;
+              String likes = allQuotes[index].upVotes.toString();
+              String dislikes = allQuotes[index].downVotes.toString();
+              List<Map<String, dynamic>> votes = [
+        {"voter": "anil", "vote": Vote.LIKE},
+        {"voter": "anil", "vote": Vote.LIKE},
+        {"voter": "anil", "vote": Vote.LIKE},
+        {"voter": "anil", "vote": Vote.DISLIKE}
+      ];
               return Row(
                 children: [
                   Expanded(
@@ -67,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ListTile(
                       leading: Icon(Icons.star),
                       title: Text(
-                        author,
+                        "",//author,
                         style: const TextStyle(color: Colors.black),
                       ),
                       subtitle: Text(quote),
@@ -77,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => DetailScreen.fromArgs(
-                                    quote, author, votes,likes,dislikes)));
+                                builder: (context) =>
+                                    DetailScreen.fromArgs(quote, " ", votes, likes, dislikes)));
                       },
                     ),
                   ),
@@ -93,30 +145,30 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               likes.toString(),
                               style: const TextStyle(
-                                  color: Colors.green, fontSize: 20,fontWeight: FontWeight.bold),
+                                  color: Colors.green, fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                             Text(
                               dislikes.toString(),
                               style: const TextStyle(
-                                  color: Colors.red, fontSize: 20,fontWeight: FontWeight.bold),
+                                  color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
                         SizedBox(width: 12),
-                        Column(children: [
-                          ElevatedButton(
-                              onPressed: () {
-                                likeQuote();
-                              },
-                              child: Center(
-                                  child: const Icon(Icons.arrow_upward_sharp))),
-                          ElevatedButton(
-                              onPressed: () {
-                                dislikeQuote();
-                              },
-                              child: const Icon(Icons.arrow_downward_sharp))
-                        ],),
-
+                        Column(
+                          children: [
+                            ElevatedButton(
+                                onPressed: () {
+                                  likeQuote();
+                                },
+                                child: Center(child: const Icon(Icons.arrow_upward_sharp))),
+                            ElevatedButton(
+                                onPressed: () {
+                                  dislikeQuote();
+                                },
+                                child: const Icon(Icons.arrow_downward_sharp))
+                          ],
+                        ),
                       ],
                     ),
                   )
