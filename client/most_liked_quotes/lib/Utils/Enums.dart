@@ -1,4 +1,4 @@
-enum Vote{
+enum VoteType{
   LIKE,
   DISLIKE
 }

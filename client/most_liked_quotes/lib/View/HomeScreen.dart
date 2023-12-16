@@ -1,12 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:most_liked_quotes/Models/quote.dart';
+import 'package:most_liked_quotes/Provider/auth.dart';
 import 'package:most_liked_quotes/Provider/quotes.dart';
 import 'package:most_liked_quotes/Utils/GlobalVariables.dart';
 import 'package:most_liked_quotes/View/DetailScreen.dart';
 import 'package:provider/provider.dart';
-
-import '../Utils/Enums.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,35 +52,56 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didChangeDependencies();
   }
 
-  void likeQuote() async {}
+  void likeQuote(String quoteId) async {
 
-  void dislikeQuote() async {}
+    final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
+    final auth = Provider.of<Auth>(context, listen: false);
+    try {
+      setState(() {
+        error = false;
+        errorMessage = "";
+        isLoading = true;
+      });
+      await quotesProvider.upVote(quoteId, auth.id);
+      await quotesProvider.getQuotes();
 
-  final List<Map<String, dynamic>> dataList = [
-    {
-      'author': 'Heroes',
-      'quote':
-          'Not all heroes wear Not all heroes wear capes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkfNot all heroes wear capes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkfNot all heroes wear capes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkfcapes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkf asjfk aj.',
-      "likes": 32,
-      "dislikes": 21,
-      "votes": [
-        {"voter": "anil", "vote": Vote.LIKE},
-        {"voter": "anil", "vote": Vote.LIKE},
-        {"voter": "anil", "vote": Vote.LIKE},
-        {"voter": "anil", "vote": Vote.DISLIKE}
-      ]
-    },
-    // {
-    //   'author': 'Heroes',
-    //   'quote': 'Not all heroes wear capes.',
-    //   "likes": 32,
-    //   "dislikes": 21
-    // },
+      setState(() {
+        isLoading = false;
+        allQuotes = quotesProvider.allQuotes;
+      });
+    } catch (e) {
+      setState(() {
+        error = true;
+        errorMessage = "Something went wrong.";
+      });
+    }
+  }
 
-    // {'title': 'Opportunities', 'subtitle': 'Opportunities don\'t happen, you create them.',"numberOfLikes":47}
+  void dislikeQuote(String quoteId) async {
 
-    // Add more data as needed
-  ];
+    
+    final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
+    final auth = Provider.of<Auth>(context, listen: false);
+    try {
+      setState(() {
+        error = false;
+        errorMessage = "";
+        isLoading = true;
+      });
+      await quotesProvider.downVote(quoteId, auth.id);
+      await quotesProvider.getQuotes();
+
+      setState(() {
+        isLoading = false;
+        allQuotes = quotesProvider.allQuotes;
+      });
+    } catch (e) {
+      setState(() {
+        error = true;
+        errorMessage = "Something went wrong.";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,21 +125,15 @@ class _HomeScreenState extends State<HomeScreen> {
               //String author = dataList[index]["author"]!;
               String likes = allQuotes[index].upVotes.toString();
               String dislikes = allQuotes[index].downVotes.toString();
-              List<Map<String, dynamic>> votes = [
-        {"voter": "anil", "vote": Vote.LIKE},
-        {"voter": "anil", "vote": Vote.LIKE},
-        {"voter": "anil", "vote": Vote.LIKE},
-        {"voter": "anil", "vote": Vote.DISLIKE}
-      ];
               return Row(
                 children: [
                   Expanded(
                     flex: 5,
                     child: ListTile(
                       leading: Icon(Icons.star),
-                      title: Text(
+                      title: const Text(
                         "",//author,
-                        style: const TextStyle(color: Colors.black),
+                        style:  TextStyle(color: Colors.black),
                       ),
                       subtitle: Text(quote),
                       onTap: () {
@@ -130,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    DetailScreen.fromArgs(quote, " ", votes, likes, dislikes)));
+                                    DetailScreen.fromArgs(allQuotes[index])));
                       },
                     ),
                   ),
@@ -154,17 +167,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Column(
                           children: [
                             ElevatedButton(
                                 onPressed: () {
-                                  likeQuote();
+                                  likeQuote(allQuotes[index].id.toString());
                                 },
-                                child: Center(child: const Icon(Icons.arrow_upward_sharp))),
+                                child: const Center(child:  Icon(Icons.arrow_upward_sharp))),
                             ElevatedButton(
                                 onPressed: () {
-                                  dislikeQuote();
+                                  dislikeQuote(allQuotes[index].id.toString());
                                 },
                                 child: const Icon(Icons.arrow_downward_sharp))
                           ],

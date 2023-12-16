@@ -1,8 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:most_liked_quotes/Provider/auth.dart';
 import 'package:most_liked_quotes/View/Components/CustomTextField.dart';
-import 'package:most_liked_quotes/View/Components/LoginButton.dart';
 import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -19,13 +17,49 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool error = false;
   String errorMessage = "";
 
-  Future<bool> signup() async {
-    if (usernameController.text.isEmpty || passwordController.text.isEmpty) {
+  bool isValidUsername() {
+    if (usernameController.text.isEmpty) {
       setState(() {
         error = true;
-      errorMessage = "All fields are mandatory!";
+        errorMessage = "All fields are mandatory!";
       });
-      
+
+      return false;
+    } else if (usernameController.text.length > 20) {
+      setState(() {
+        error = true;
+        errorMessage = "Username is too long!";
+      });
+      return false;
+    } else if (usernameController.text.contains(RegExp(r'[\n\s \"]'))) {
+      setState(() {
+        error = true;
+        errorMessage = "Username should not include space!";
+      });
+      return false;
+    }
+    return true;
+  }
+
+  bool isValidPassword() {
+    if (passwordController.text.isEmpty) {
+      setState(() {
+        error = true;
+        errorMessage = "All fields are mandatory!";
+      });
+      return false;
+    } else if (passwordController.text.contains(RegExp(r'[\n\s \"]'))) {
+      setState(() {
+        error = true;
+        errorMessage = "Password should not include space!";
+      });
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> signup() async {
+    if (!isValidUsername() || !isValidPassword()) {
       return false;
     }
     try {

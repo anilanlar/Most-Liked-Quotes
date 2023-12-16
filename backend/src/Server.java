@@ -83,13 +83,10 @@ class Server {
                 // get more data from client
                 String username = inFromClient.readLine();
                 String password = inFromClient.readLine();
-                System.out.println("data geldi");
-                System.out.println(username);
-                System.out.println(password);
                 // process data
                 try {
                     String id = Helper.login(username, password);
-					System.out.println("userid: " +id);
+
                     // return info message
                     outToClient.writeBytes(id + "\n");
                     if (id == "-1") {

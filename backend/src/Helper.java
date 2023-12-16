@@ -333,7 +333,7 @@ public class Helper {
                 String line = in.nextLine().trim();
                 String[] params = line.split(" ");
                 if (params[1].trim().compareTo(quote_id) == 0) {
-                    votes = votes + params[0].trim() + " " + params[2].trim() + "\n";
+                    votes = votes + getUsernameWithId(params[0].trim()) + " " + params[2].trim() + "\n";
                 }
 
             }
@@ -343,5 +343,26 @@ public class Helper {
         }
         Server.semaphoreVotesFile.release();
         return votes;
+    }
+        protected static String getUsernameWithId(String id) throws InterruptedException {
+        try {
+            Server.semaphoreUsersFile.acquire();
+            Scanner in = new Scanner(new File(usersFileName));
+            while (in.hasNext()) {
+                String line = in.nextLine();
+                String[] params = line.split(" ");
+                if (id.compareTo(params[0]) == 0) {
+                    Server.semaphoreUsersFile.release();
+                    return params[1];
+                }
+            }
+            in.close();
+            Server.semaphoreUsersFile.release();
+            return "";
+        } catch (IOException e) {
+            System.out.println(e);
+            Server.semaphoreUsersFile.release();
+            return "";
+        }
     }
 }

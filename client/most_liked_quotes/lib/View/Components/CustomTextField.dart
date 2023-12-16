@@ -1,12 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatefulWidget {
-  String labelText;
-  String hintText;
-  bool isObscure;
-  TextEditingController controller;
-  CustomTextField(
+  final String labelText;
+  final String hintText;
+  final bool isObscure;
+  final TextEditingController controller;
+  const CustomTextField(
       {super.key, required this.labelText, required this.hintText, required this.isObscure, required this.controller});
 
   @override
@@ -22,14 +21,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
       decoration: InputDecoration(
         labelText: widget.labelText,
         hintText: widget.hintText,
-        prefixIcon: Icon(Icons.text_fields),
+        prefixIcon: const Icon(Icons.text_fields),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
         filled: true,
         fillColor: Colors.grey[200],
       ),
-      style: TextStyle(fontSize: 16.0),
+      style: const TextStyle(fontSize: 16.0),
       onChanged: (value) {
         // Handle text changes here
       },
