@@ -1,37 +1,49 @@
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
+import 'package:most_liked_quotes/Provider/auth.dart';
+import 'package:most_liked_quotes/Provider/quotes.dart';
 import 'package:most_liked_quotes/View/DetailScreen.dart';
-import 'dart:io';
+
 
 import 'package:most_liked_quotes/View/HomeScreen.dart';
 import 'package:most_liked_quotes/View/LoginScreen.dart';
+import 'package:flutter_portal/flutter_portal.dart';
+import 'package:most_liked_quotes/View/SignupScreen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-
-
   const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'MostLikedQuotes',
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/detail': (context) =>  DetailScreen(),
-      },
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<Auth>(create: (context) => Auth()),
+        ChangeNotifierProvider<QuotesProvider>(create: (context) => QuotesProvider()),
+      ],
+      child: Portal(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'MostLikedQuotes',
+          initialRoute: '/',
+          routes: {
+            '/': (context) => const LoginScreen(),
+            '/home': (context) => const HomeScreen(),
+            '/detail': (context) => DetailScreen(),
+            '/signup': (context) => SignUpScreen(),
+          },
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          // home: const MyHomePage(title: 'Most Liked Quotes'),
+        ),
       ),
-      // home: const MyHomePage(title: 'Most Liked Quotes'),
     );
   }
 }

@@ -28,8 +28,10 @@ class Server {
                 try {
                     outToClient.writeBytes(quotes);
                 outToClient.writeBytes("StatusCode: 200");
+                
             } catch (Exception e) {
                 outToClient.writeBytes("StatusCode: 401");
+                outToClient.close();
             }
             } else if (requestType.compareTo("upvote_quote") == 0) {
                 // get more data from client
@@ -42,6 +44,7 @@ class Server {
                 } catch (Exception e) {
                     // return info message
                     outToClient.writeBytes("StatusCode: 404");
+                    outToClient.close();
                 }
 
                 // return info message
@@ -56,6 +59,7 @@ class Server {
                 } catch (Exception e) {
                     // return info message
                     outToClient.writeBytes("StatusCode: 404");
+                    outToClient.close();
                 }
 
             }
@@ -68,7 +72,9 @@ class Server {
                     Helper.registerUser(username, password);
                     outToClient.writeBytes("StatusCode: 201");
                 } catch (Exception e) {
+                    System.out.print(e);
                     outToClient.writeBytes("StatusCode: 409");
+                    outToClient.close();
                 }
 
                 // return info message
@@ -80,11 +86,21 @@ class Server {
                 // process data
                 try {
                     String id = Helper.login(username, password);
+
                     // return info message
-                    outToClient.writeBytes(id);
-                    outToClient.writeBytes("StatusCode: 200");
+                    outToClient.writeBytes(id + "\n");
+                    if (id == "-1") {
+                        outToClient.writeBytes("StatusCode: 401");
+                    }
+                    else {
+                        outToClient.writeBytes("StatusCode: 200");
+                    }
+                    
                 } catch (Exception e) {
+                    System.out.println(e);
+                    outToClient.writeBytes("-1" + "\n");
                     outToClient.writeBytes("StatusCode: 401");
+                    outToClient.close();
                 }
             } else if (requestType.compareTo("get_votes_by_quote_id") == 0) {
                 // get more data from client
@@ -97,6 +113,7 @@ class Server {
                     outToClient.writeBytes("StatusCode: 200");
                 } catch (Exception e) {
                     outToClient.writeBytes("StatusCode: 401");
+                    outToClient.close();
                 }
             }
 

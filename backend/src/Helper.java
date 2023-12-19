@@ -6,11 +6,28 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Helper {
-    private static int numOfUsers = 0;
+    private static int numOfUsers;
     private static String quotesFileName = "../database/quotes.txt";
     private static String usersFileName = "../database/users.txt";
     private static String votesFileName = "../database/votes.txt";
 
+
+    protected static void getNumOfUsers()throws Exception  {
+        try {
+            Server.semaphoreUsersFile.acquire();
+            numOfUsers = 0;
+            Scanner in = new Scanner(new File(usersFileName));
+            while (in.hasNext()) {
+                in.nextLine();
+                numOfUsers += 1;
+            }
+            in.close();
+            Server.semaphoreUsersFile.release();
+        } catch (IOException e) {
+            Server.semaphoreUsersFile.release();
+            System.out.println(e);
+        }
+    }
     protected static boolean checkUserExists(String username) throws InterruptedException {
         try {
             Server.semaphoreUsersFile.acquire();
@@ -20,6 +37,7 @@ public class Helper {
                 String[] params = line.split(" ");
                 if (params[1].compareTo(username) == 0) {
                     in.close();
+                    Server.semaphoreUsersFile.release();
                     return true;
                 }
             }
@@ -38,8 +56,8 @@ public class Helper {
             if (checkUserExists(username)) {
                 throw new Exception("Username is already given");
             } else {
+                getNumOfUsers();
                 Server.semaphoreUsersFile.acquire();
-                numOfUsers++;
                 FileWriter fileWriter = new FileWriter(usersFileName, true);
                 BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(numOfUsers + " " + username + " " + password);
@@ -68,6 +86,8 @@ public class Helper {
                         Server.semaphoreUsersFile.release();
                         return params[0];
                     } else {
+                        in.close();
+                         Server.semaphoreUsersFile.release();
                         throw new Exception("Invalid Credentials.");
                     }
                 }
@@ -313,7 +333,7 @@ public class Helper {
                 String line = in.nextLine().trim();
                 String[] params = line.split(" ");
                 if (params[1].trim().compareTo(quote_id) == 0) {
-                    votes = votes + params[0].trim() + " " + params[2].trim() + "\n";
+                    votes = votes + getUsernameWithId(params[0].trim()) + " " + params[2].trim() + "\n";
                 }
 
             }
@@ -323,5 +343,26 @@ public class Helper {
         }
         Server.semaphoreVotesFile.release();
         return votes;
+    }
+        protected static String getUsernameWithId(String id) throws InterruptedException {
+        try {
+            Server.semaphoreUsersFile.acquire();
+            Scanner in = new Scanner(new File(usersFileName));
+            while (in.hasNext()) {
+                String line = in.nextLine();
+                String[] params = line.split(" ");
+                if (id.compareTo(params[0]) == 0) {
+                    Server.semaphoreUsersFile.release();
+                    return params[1];
+                }
+            }
+            in.close();
+            Server.semaphoreUsersFile.release();
+            return "";
+        } catch (IOException e) {
+            System.out.println(e);
+            Server.semaphoreUsersFile.release();
+            return "";
+        }
     }
 }

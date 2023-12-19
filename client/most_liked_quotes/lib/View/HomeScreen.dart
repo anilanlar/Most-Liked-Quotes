@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:most_liked_quotes/Models/quote.dart';
+import 'package:most_liked_quotes/Provider/auth.dart';
+import 'package:most_liked_quotes/Provider/quotes.dart';
 import 'package:most_liked_quotes/Utils/GlobalVariables.dart';
 import 'package:most_liked_quotes/View/DetailScreen.dart';
-
-import '../Utils/Enums.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,82 +18,98 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<Quote> allQuotes = [];
+  bool isLoading = false;
+  bool error = false;
+  String errorMessage = "";
+
+  bool _isFirstTime = true;
+
+
+  void getAllQuotes() async {
+    final quotesProvider = Provider.of<QuotesProvider>(context);
+    try {
+      setState(() {
+        error = false;
+        errorMessage = "";
+        isLoading = true;
+      });
+      await quotesProvider.getQuotes();
+
+      setState(() {
+        isLoading = false;
+        allQuotes = quotesProvider.allQuotes;
+      });
+    } catch (e) {
+      setState(() {
+        error = true;
+        errorMessage = "Something went wrong.";
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isFirstTime) {
+      getAllQuotes();
+      _isFirstTime = false;
+    }
+    super.didChangeDependencies();
+  }
 
   void likeQuote(String quoteId) async {
-    Socket socket = await Socket.connect(GlobalVariables.host, GlobalVariables.port);
-    socket.writeln("upvote_quote");
-    socket.writeln(quoteId);
-    socket.writeln(GlobalVariables.userId);
-    String message = "";
-    await socket.listen(
-          (data) {
-        message = message + utf8.decode(data);
-      },
-      onDone: () {
-        if (message.compareTo("StatusCode: 200") == 0) {
-          print("voted");
-        } else {
-          print("not voted");
-        }
-        print('Socket closed');
-        socket.destroy();
-      },
-    );
+
+    final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
+    final auth = Provider.of<Auth>(context, listen: false);
+    try {
+      setState(() {
+        error = false;
+        errorMessage = "";
+        isLoading = true;
+      });
+      await quotesProvider.upVote(quoteId, auth.id);
+      await quotesProvider.getQuotes();
+
+      setState(() {
+        isLoading = false;
+        allQuotes = quotesProvider.allQuotes;
+      });
+    } catch (e) {
+      setState(() {
+        error = true;
+        errorMessage = "Something went wrong.";
+      });
+    }
   }
 
-  void getQuotes() async {
-    Socket socket = await Socket.connect(GlobalVariables.host, GlobalVariables.port);
-    socket.writeln("get_quotes");
-    String message = "";
-    await socket.listen(
-          (data) {
-        message = message + utf8.decode(data);
-      },
-      onDone: () {
-        if (message.compareTo("StatusCode: 200") == 0) {
-          print("quotes fetched");
-          print(message);
-        } else {
-          print("not voted");
-        }
-        print('Socket closed');
-        socket.destroy();
-      },
-    );
+  void dislikeQuote(String quoteId) async {
+
+    
+    final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
+    final auth = Provider.of<Auth>(context, listen: false);
+    try {
+      setState(() {
+        error = false;
+        errorMessage = "";
+        isLoading = true;
+      });
+      await quotesProvider.downVote(quoteId, auth.id);
+      await quotesProvider.getQuotes();
+
+      setState(() {
+        isLoading = false;
+        allQuotes = quotesProvider.allQuotes;
+      });
+    } catch (e) {
+      setState(() {
+        error = true;
+        errorMessage = "Something went wrong.";
+      });
+    }
   }
-
-  void dislikeQuote() async {}
-
-  final List<Map<String, dynamic>> dataList = [
-    {
-      "quoteId":12,
-      'author': 'Heroes',
-      'quote':
-          'Not all heroes wear Not all heroes wear capes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkfNot all heroes wear capes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkfNot all heroes wear capes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkfcapes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkf asjfk aj.',
-      "likes": 32,
-      "dislikes": 21,
-      "votes": [
-        {"voter": "anil", "vote": Vote.LIKE},
-        {"voter": "anil", "vote": Vote.LIKE},
-        {"voter": "anil", "vote": Vote.LIKE},
-        {"voter": "anil", "vote": Vote.DISLIKE}
-      ]
-    },
-    // {
-    //   'author': 'Heroes',
-    //   'quote': 'Not all heroes wear capes.',
-    //   "likes": 32,
-    //   "dislikes": 21
-    // },
-
-    // {'title': 'Opportunities', 'subtitle': 'Opportunities don\'t happen, you create them.',"numberOfLikes":47}
-
-    // Add more data as needed
-  ];
 
   @override
   Widget build(BuildContext context) {
-    getQuotes();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: GlobalVariables.appBarColor,
@@ -99,23 +117,28 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
       ),
       body: Container(
-        child: ListView.builder(
-            itemCount: dataList.length,
+        child: isLoading?  Container(
+              padding: const EdgeInsets.only(top: 32),
+              decoration: const BoxDecoration(color: Colors.white),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ) :ListView.builder(
+            itemCount: allQuotes.length,
             itemBuilder: (BuildContext context, int index) {
-              String quote = dataList[index]["quote"]!;
-              String author = dataList[index]["author"]!;
-              String likes = dataList[index]["likes"]!.toString();
-              String dislikes = dataList[index]["dislikes"]!.toString();
-              List<Map<String, dynamic>> votes = dataList[index]["votes"]!;
+              String quote = allQuotes[index].content;
+              //String author = dataList[index]["author"]!;
+              String likes = allQuotes[index].upVotes.toString();
+              String dislikes = allQuotes[index].downVotes.toString();
               return Row(
                 children: [
                   Expanded(
                     flex: 5,
                     child: ListTile(
                       leading: Icon(Icons.star),
-                      title: Text(
-                        author,
-                        style: const TextStyle(color: Colors.black),
+                      title: const Text(
+                        "",//author,
+                        style:  TextStyle(color: Colors.black),
                       ),
                       subtitle: Text(quote),
                       onTap: () {
@@ -124,8 +147,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => DetailScreen.fromArgs(
-                                    quote, author, votes,likes,dislikes)));
+                                builder: (context) =>
+                                    DetailScreen.fromArgs(allQuotes[index])));
                       },
                     ),
                   ),
@@ -140,30 +163,30 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               likes.toString(),
                               style: const TextStyle(
-                                  color: Colors.green, fontSize: 20,fontWeight: FontWeight.bold),
+                                  color: Colors.green, fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                             Text(
                               dislikes.toString(),
                               style: const TextStyle(
-                                  color: Colors.red, fontSize: 20,fontWeight: FontWeight.bold),
+                                  color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
-                        SizedBox(width: 12),
-                        Column(children: [
-                          ElevatedButton(
-                              onPressed: () {
-                                likeQuote("22");
-                              },
-                              child: Center(
-                                  child: const Icon(Icons.arrow_upward_sharp))),
-                          ElevatedButton(
-                              onPressed: () {
-                                dislikeQuote();
-                              },
-                              child: const Icon(Icons.arrow_downward_sharp))
-                        ],),
-
+                        const SizedBox(width: 12),
+                        Column(
+                          children: [
+                            ElevatedButton(
+                                onPressed: () {
+                                  likeQuote(allQuotes[index].id.toString());
+                                },
+                                child: const Center(child:  Icon(Icons.arrow_upward_sharp))),
+                            ElevatedButton(
+                                onPressed: () {
+                                  dislikeQuote(allQuotes[index].id.toString());
+                                },
+                                child: const Icon(Icons.arrow_downward_sharp))
+                          ],
+                        ),
                       ],
                     ),
                   )
