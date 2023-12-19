@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:most_liked_quotes/Utils/GlobalVariables.dart';
@@ -13,12 +16,55 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  void likeQuote() async {}
+
+  void likeQuote(String quoteId) async {
+    Socket socket = await Socket.connect(GlobalVariables.host, GlobalVariables.port);
+    socket.writeln("upvote_quote");
+    socket.writeln(quoteId);
+    socket.writeln(GlobalVariables.userId);
+    String message = "";
+    await socket.listen(
+          (data) {
+        message = message + utf8.decode(data);
+      },
+      onDone: () {
+        if (message.compareTo("StatusCode: 200") == 0) {
+          print("voted");
+        } else {
+          print("not voted");
+        }
+        print('Socket closed');
+        socket.destroy();
+      },
+    );
+  }
+
+  void getQuotes() async {
+    Socket socket = await Socket.connect(GlobalVariables.host, GlobalVariables.port);
+    socket.writeln("get_quotes");
+    String message = "";
+    await socket.listen(
+          (data) {
+        message = message + utf8.decode(data);
+      },
+      onDone: () {
+        if (message.compareTo("StatusCode: 200") == 0) {
+          print("quotes fetched");
+          print(message);
+        } else {
+          print("not voted");
+        }
+        print('Socket closed');
+        socket.destroy();
+      },
+    );
+  }
 
   void dislikeQuote() async {}
 
   final List<Map<String, dynamic>> dataList = [
     {
+      "quoteId":12,
       'author': 'Heroes',
       'quote':
           'Not all heroes wear Not all heroes wear capes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkfNot all heroes wear capes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkfNot all heroes wear capes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkfcapes sdkfjksadfj aksdf jasd fjasdf jkdasfj kasdjfk asdjk asdjfk asdjkf asjfk aj.',
@@ -45,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    getQuotes();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: GlobalVariables.appBarColor,
@@ -106,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Column(children: [
                           ElevatedButton(
                               onPressed: () {
-                                likeQuote();
+                                likeQuote("22");
                               },
                               child: Center(
                                   child: const Icon(Icons.arrow_upward_sharp))),
