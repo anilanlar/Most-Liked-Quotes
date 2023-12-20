@@ -28,13 +28,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void getAllQuotes() async {
     final quotesProvider = Provider.of<QuotesProvider>(context);
+    final auth = Provider.of<Auth>(context);
     try {
       setState(() {
         error = false;
         errorMessage = "";
         isLoading = true;
       });
-      await quotesProvider.getQuotes();
+      await quotesProvider.getQuotes(auth.id);
 
       setState(() {
         isLoading = false;
@@ -68,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
         isLoading = true;
       });
       await quotesProvider.upVote(quoteId, auth.id);
-      await quotesProvider.getQuotes();
+      await quotesProvider.getQuotes(auth.id);
 
       setState(() {
         isLoading = false;
@@ -83,8 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void dislikeQuote(String quoteId) async {
-
-    
     final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
     final auth = Provider.of<Auth>(context, listen: false);
     try {
@@ -94,7 +93,31 @@ class _HomeScreenState extends State<HomeScreen> {
         isLoading = true;
       });
       await quotesProvider.downVote(quoteId, auth.id);
-      await quotesProvider.getQuotes();
+      await quotesProvider.getQuotes(auth.id);
+
+      setState(() {
+        isLoading = false;
+        allQuotes = quotesProvider.allQuotes;
+      });
+    } catch (e) {
+      setState(() {
+        error = true;
+        errorMessage = "Something went wrong.";
+      });
+    }
+  }
+
+  void addQuote(String quote, String userId) async{
+    final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
+    final auth = Provider.of<Auth>(context, listen: false);
+    try {
+      setState(() {
+        error = false;
+        errorMessage = "";
+        isLoading = true;
+      });
+      await quotesProvider.addQuote(quote, userId);
+      await quotesProvider.getQuotes(auth.id);
 
       setState(() {
         isLoading = false;
@@ -111,6 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(onPressed: (){
+        addQuote();
+      }),
       appBar: AppBar(
         backgroundColor: GlobalVariables.appBarColor,
         title: Text(GlobalVariables.appTitle),
@@ -127,17 +153,19 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: allQuotes.length,
             itemBuilder: (BuildContext context, int index) {
               String quote = allQuotes[index].content;
-              //String author = dataList[index]["author"]!;
+              String author = allQuotes[index].author;
               String likes = allQuotes[index].upVotes.toString();
               String dislikes = allQuotes[index].downVotes.toString();
+              String upvotedOrDownvoted = allQuotes[index].upvotedOrDownvoted;
+
               return Row(
                 children: [
                   Expanded(
                     flex: 5,
                     child: ListTile(
                       leading: Icon(Icons.star),
-                      title: const Text(
-                        "",//author,
+                      title: Text(
+                        author,//author,
                         style:  TextStyle(color: Colors.black),
                       ),
                       subtitle: Text(quote),
@@ -150,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 builder: (context) =>
                                     DetailScreen.fromArgs(allQuotes[index])));
                       },
+                       tileColor: upvotedOrDownvoted == "N" ? Colors.white : (upvotedOrDownvoted=="U" ? Colors.greenAccent.shade200 : Colors.redAccent.shade200),
                     ),
                   ),
                   Expanded(
