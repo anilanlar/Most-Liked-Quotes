@@ -379,7 +379,7 @@ public class Helper {
             } else {
                 Server.semaphoreQuotesFile.acquire();
                 int numOfQuotes = 0;
-                Scanner in = new Scanner(new File(usersFileName));
+                Scanner in = new Scanner(new File(quotesFileName));
                 while (in.hasNext()) {
                     in.nextLine();
                     numOfQuotes += 1;
@@ -394,12 +394,12 @@ public class Helper {
                 bufferedWriter.newLine();
                 bufferedWriter.close();
                 fileWriter.close();
-                Server.semaphoreUsersFile.release();
+                Server.semaphoreQuotesFile.release();
             }
 
         } catch (IOException e) {
             System.out.println(e);
-            Server.semaphoreUsersFile.release();
+            Server.semaphoreQuotesFile.release();
         }
     }
 }
