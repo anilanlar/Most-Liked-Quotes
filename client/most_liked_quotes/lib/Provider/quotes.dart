@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:most_liked_quotes/Models/quote.dart';
 import 'package:most_liked_quotes/Models/vote.dart';
 
+import '../Utils/GlobalVariables.dart';
+
 class QuotesProvider with ChangeNotifier {
-  static const String serverAddress = '192.168.1.246';
-  static const int serverPort = 8080;
+  static const String serverAddress = GlobalVariables.host;
+  static const int serverPort = GlobalVariables.port;
 
   List<Quote> allQuotes = [];
   List<Vote> allVotes = [];

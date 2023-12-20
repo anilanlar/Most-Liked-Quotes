@@ -3,10 +3,11 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:most_liked_quotes/Utils/GlobalVariables.dart';
 
 class Auth with ChangeNotifier {
-  static const String serverAddress = '192.168.1.246';
-  static const int serverPort = 8080;
+  static const String serverAddress = GlobalVariables.host;
+  static const int serverPort = GlobalVariables.port;
 
   String id = "-1";
   String username = "";

@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:most_liked_quotes/Models/quote.dart';
 import 'package:most_liked_quotes/Provider/auth.dart';
@@ -20,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String errorMessage = "";
 
   bool _isFirstTime = true;
+
 
   void getAllQuotes() async {
     final quotesProvider = Provider.of<QuotesProvider>(context);
