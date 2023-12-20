@@ -11,7 +11,7 @@ class Server {
     {
         String requestType;
         ServerSocket welcomeSocket = new ServerSocket(8080);
-
+        System.out.println("Server RUN");
 
         while (true) {
             Socket connectionSocket = welcomeSocket.accept();
@@ -19,20 +19,20 @@ class Server {
             DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
             // read type of the request
             requestType = inFromClient.readLine(); // available types are "get_quotes", "upvote_quote" ,
-                                                   // "downvote_quote", "sign_up", "log_in";
-                                                   // "get_votes_by_quote_id"
+            // "downvote_quote", "sign_up", "log_in";
+            // "get_votes_by_quote_id"
             // client request is read
             if (requestType.compareTo("get_quotes") == 0) {
                 // return data to client
                 String quotes = Helper.getQuotes();
                 try {
                     outToClient.writeBytes(quotes);
-                outToClient.writeBytes("StatusCode: 200");
-                
-            } catch (Exception e) {
-                outToClient.writeBytes("StatusCode: 401");
-                outToClient.close();
-            }
+                    outToClient.writeBytes("StatusCode: 200");
+
+                } catch (Exception e) {
+                    outToClient.writeBytes("StatusCode: 401");
+                    outToClient.close();
+                }
             } else if (requestType.compareTo("upvote_quote") == 0) {
                 // get more data from client
                 String quoteID = inFromClient.readLine();
@@ -95,7 +95,7 @@ class Server {
                     else {
                         outToClient.writeBytes("StatusCode: 200");
                     }
-                    
+
                 } catch (Exception e) {
                     System.out.println(e);
                     outToClient.writeBytes("-1" + "\n");

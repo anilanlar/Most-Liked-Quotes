@@ -6,28 +6,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Helper {
-    private static int numOfUsers;
     private static String quotesFileName = "../database/quotes.txt";
     private static String usersFileName = "../database/users.txt";
     private static String votesFileName = "../database/votes.txt";
 
-
-    protected static void getNumOfUsers()throws Exception  {
-        try {
-            Server.semaphoreUsersFile.acquire();
-            numOfUsers = 0;
-            Scanner in = new Scanner(new File(usersFileName));
-            while (in.hasNext()) {
-                in.nextLine();
-                numOfUsers += 1;
-            }
-            in.close();
-            Server.semaphoreUsersFile.release();
-        } catch (IOException e) {
-            Server.semaphoreUsersFile.release();
-            System.out.println(e);
-        }
-    }
     protected static boolean checkUserExists(String username) throws InterruptedException {
         try {
             Server.semaphoreUsersFile.acquire();
@@ -56,8 +38,15 @@ public class Helper {
             if (checkUserExists(username)) {
                 throw new Exception("Username is already given");
             } else {
-                getNumOfUsers();
                 Server.semaphoreUsersFile.acquire();
+                int numOfUsers = 0;
+                Scanner in = new Scanner(new File(usersFileName));
+                while (in.hasNext()) {
+                    in.nextLine();
+                    numOfUsers += 1;
+                }
+                in.close();
+                numOfUsers++;
                 FileWriter fileWriter = new FileWriter(usersFileName, true);
                 BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(numOfUsers + " " + username + " " + password);
