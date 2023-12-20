@@ -31,22 +31,24 @@ class _LoginScreenState extends State<LoginScreen> {
         error = false;
         errorMessage = "";
       });
-      await auth.login(usernameController.text, passwordController.text).then((value) => {
-            if (auth.id != "-1")
-              {
-                setState(() {
-                  error = false;
-                  errorMessage = "";
-                })
-              }
-            else
-              {
-                setState(() {
-                  error = true;
-                  errorMessage = "Invalid Credentials";
-                })
-              }
-          });
+      await auth.login(usernameController.text, passwordController.text).then((
+          value) =>
+      {
+        if (auth.id != "-1")
+          {
+            setState(() {
+              error = false;
+              errorMessage = "";
+            })
+          }
+        else
+          {
+            setState(() {
+              error = true;
+              errorMessage = "Invalid Credentials";
+            })
+          }
+      });
     } catch (e) {
       setState(() {
         error = true;
@@ -73,6 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
           Container(
             child: Column(
               children: [
+                Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 30),
+                    child: Image.asset(
+                        "assets/logo.png", width: 250, height: 250),
+                    ),
                 const SizedBox(
                   width: 350,
                   child: Text(

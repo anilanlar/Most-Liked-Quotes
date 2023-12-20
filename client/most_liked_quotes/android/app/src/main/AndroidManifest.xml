@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="most_liked_quotes"
+        android:label="Most Liked Quotes"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
