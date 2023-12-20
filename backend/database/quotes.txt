@@ -1,5 +1,7 @@
-1 "Hello World!" 42 6
-2 "There are only 10 types of people in the world: those who understand binary, and those who don't." 15 12
-3 "Code is like humor. When you have to explain it, it's bad." 3 42
-4 "Software is a great combination of artistry and engineering." 4 2
-5 "It's not a bug, it's a feature." 62 16
+1-----Author1-----"Hello World!"-----44-----5
+2-----Author2-----"There are only 10 types of people in the world: those who understand binary, and those who don't."-----15-----13
+3-----Author3-----"Code is like humor. When you have to explain it, it's bad."-----3-----42
+4-----Author4-----"Software is a great combination of artistry and engineering."-----5-----2
+5-----Author5-----"It's not a bug, it's a feature."-----62-----17
+6-----Author6-----"It's not a bug, it's a feature."-----64-----15
+7-----Author7-----"Software is a great combination of artistry and engineering."-----5-----3
