@@ -50,15 +50,34 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+
+
+
   @override
   void didChangeDependencies() {
     if (_isFirstTime) {
       getAllQuotes();
       _isFirstTime = false;
     }
+    getAllQuotes();
     super.didChangeDependencies();
   }
 
+  void addQuote(String quote) async {
+    final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
+    final auth = Provider.of<Auth>(context, listen: false);
+    try {
+      await quotesProvider.addQuote(quote, auth.id);
+      await quotesProvider.getQuotes(auth.id);
+
+      setState(() {
+        isLoading = false;
+        allQuotes = quotesProvider.allQuotes;
+      });
+    } catch (e) {
+      print("Error adding a quote!");
+    }
+  }
   void likeQuote(String quoteId) async {
     final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
     final auth = Provider.of<Auth>(context, listen: false);
@@ -126,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => AddQuoteScreen()));
+                        builder: (context) => AddQuoteScreen(addQuote: addQuote)));
                 // addQuote();
               })
         ],

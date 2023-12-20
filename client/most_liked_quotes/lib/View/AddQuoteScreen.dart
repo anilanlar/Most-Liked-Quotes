@@ -8,7 +8,8 @@ import '../Provider/quotes.dart';
 import '../Utils/GlobalVariables.dart';
 
 class AddQuoteScreen extends StatefulWidget {
-  const AddQuoteScreen({super.key});
+  final Function addQuote;
+  const AddQuoteScreen({super.key, required this.addQuote});
 
   @override
   State<AddQuoteScreen> createState() => _AddQuoteScreenState();
@@ -16,17 +17,6 @@ class AddQuoteScreen extends StatefulWidget {
 
 class _AddQuoteScreenState extends State<AddQuoteScreen> {
 
-  void addQuote(String quote) async {
-    final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
-    final auth = Provider.of<Auth>(context, listen: false);
-    try {
-      await quotesProvider.addQuote(quote, auth.id);
-      await quotesProvider.getQuotes(auth.id);
-
-    } catch (e) {
-        print("Error adding a quote!");
-    }
-  }
 
   String? quote;
   bool error = false;
@@ -64,7 +54,8 @@ class _AddQuoteScreenState extends State<AddQuoteScreen> {
           ElevatedButton(
             onPressed: () {
               if(quote != null && quote!=""){
-                addQuote(quote!);
+                widget.addQuote(quote!);
+
                 Navigator.pop(context);
               }else{
                 setState(() {
