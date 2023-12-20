@@ -125,7 +125,7 @@ public class Helper {
             Scanner in = new Scanner(new File(quotesFileName));
             while (in.hasNext()) {
                 String line = in.nextLine();
-                String[] params = line.split("$-$");
+                String[] params = line.split("-----");
                 if (id.compareTo(params[0]) == 0) {
                     in.close();
                     Server.semaphoreQuotesFile.release();
@@ -225,14 +225,15 @@ public class Helper {
                         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
                         for (String line : lines) {
-                            String[] params = line.split("\"");
-                            String quote = params[1].trim();
+                            String[] params = line.split("-----");
                             String id = params[0].trim();
-                            String[] votes = params[2].trim().split(" ");
-                            String upvote = votes[0].trim();
-                            String downvote = votes[1].trim();
+                            String author = params[1].trim();
+                            String quote = params[2].trim();
+                            String upvote = params[3].trim();
+                            String downvote = params[4].trim();
                             if (quoteID.compareTo(id) == 0) {
-                                bufferedWriter.write(id + " \"" + quote + "\" " + upvote + " "
+                                bufferedWriter
+                                        .write(id + "-----" + author + "-----" + quote + "-----" + upvote + "-----"
                                         + String.format("%d", Integer.parseInt(downvote) + 1));
                                 bufferedWriter.newLine();
                             } else {
@@ -289,17 +290,18 @@ public class Helper {
                         FileWriter fileWriter = new FileWriter(quotesFileName);
                         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                         for (String line : lines) {
-                            String[] params = line.split("\"");
-                            String quote = params[1].trim();
+                            String[] params = line.split("-----");
                             String id = params[0].trim();
-                            String[] votes = params[2].trim().split(" ");
-                            String upvote = votes[0].trim();
-                            String downvote = votes[1].trim();
+                            String author = params[1].trim();
+                            String quote = params[2].trim();
+                            String upvote = params[3].trim();
+                            String downvote = params[4].trim();
 
                             if (quoteID.compareTo(id) == 0) {
                                 bufferedWriter.write(
-                                        id + " \"" + quote + "\" " + String.format("%d", Integer.parseInt(upvote) + 1)
-                                                + " "
+                                        id + "-----" + author + "-----" + quote + "-----"
+                                                + String.format("%d", Integer.parseInt(upvote) + 1)
+                                                + "-----"
                                                 + downvote);
                                 bufferedWriter.newLine();
                             } else {
