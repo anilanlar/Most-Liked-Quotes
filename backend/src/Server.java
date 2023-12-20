@@ -11,7 +11,7 @@ class Server {
     {
         String requestType;
         ServerSocket welcomeSocket = new ServerSocket(8080);
-
+        Helper.add_quote("New quote added", "1");
 
         while (true) {
             Socket connectionSocket = welcomeSocket.accept();
@@ -24,7 +24,8 @@ class Server {
             // client request is read
             if (requestType.compareTo("get_quotes") == 0) {
                 // return data to client
-                String quotes = Helper.getQuotes();
+                String userID = inFromClient.readLine();
+                String quotes = Helper.getQuotes(userID);
                 try {
                     outToClient.writeBytes(quotes);
                 outToClient.writeBytes("StatusCode: 200");
@@ -115,6 +116,20 @@ class Server {
                     outToClient.writeBytes("StatusCode: 401");
                     outToClient.close();
                 }
+            } else if (requestType.compareTo("add_quote") == 0) {
+                // get more data from client
+                String quote = inFromClient.readLine();
+                String userID = inFromClient.readLine();
+                try {
+                    // process data
+                    Helper.add_quote(quote, userID);
+                    outToClient.writeBytes("StatusCode: 200");
+                } catch (Exception e) {
+                    // return info message
+                    outToClient.writeBytes("StatusCode: 404");
+                    outToClient.close();
+                }
+
             }
 
             outToClient.close();
