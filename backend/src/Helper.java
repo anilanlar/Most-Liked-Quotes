@@ -105,7 +105,7 @@ public class Helper {
 
                     voted = result[1];
                 }
-                quotes = quotes + line + voted + "\n";
+                quotes = quotes + line + "-----" + voted + "\n";
             }
             in.close();
             Server.semaphoreQuotesFile.release();
