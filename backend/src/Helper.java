@@ -180,8 +180,8 @@ public class Helper {
                     return result;
                 }
             }
-            Server.semaphoreVotesFile.release();
             in.close();
+            Server.semaphoreVotesFile.release();
             result[0] = "0";
             result[1] = "";
             return result;
