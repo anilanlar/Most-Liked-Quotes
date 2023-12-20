@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void addQuote(String quote, String userId) async{
+  void addQuote(String quote) async{
     final quotesProvider = Provider.of<QuotesProvider>(context, listen: false);
     final auth = Provider.of<Auth>(context, listen: false);
     try {
@@ -116,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
         errorMessage = "";
         isLoading = true;
       });
-      await quotesProvider.addQuote(quote, userId);
+      await quotesProvider.addQuote(quote, auth.id);
       await quotesProvider.getQuotes(auth.id);
 
       setState(() {
@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(onPressed: (){
-        addQuote();
+        // addQuote();
       }),
       appBar: AppBar(
         backgroundColor: GlobalVariables.appBarColor,

@@ -91,14 +91,21 @@ public class Helper {
         }
     }
 
-    protected static String getQuotes() throws InterruptedException {
+    protected static String getQuotes(String userID) throws InterruptedException {
         String quotes = "";
         try {
             Server.semaphoreQuotesFile.acquire();
             Scanner in = new Scanner(new File(quotesFileName));
             while (in.hasNext()) {
                 String line = in.nextLine();
-                quotes = quotes + line + "\n";
+                String[] params = line.split("-----");
+                String voted = "N";
+                String[] result = checkUserVotedTheQuote(params[0].trim(), userID);
+                if (result[0] == "1") {
+
+                    voted = result[1];
+                }
+                quotes = quotes + line + voted + "\n";
             }
             in.close();
             Server.semaphoreQuotesFile.release();
@@ -118,7 +125,7 @@ public class Helper {
             Scanner in = new Scanner(new File(quotesFileName));
             while (in.hasNext()) {
                 String line = in.nextLine();
-                String[] params = line.split(" ");
+                String[] params = line.split("$-$");
                 if (id.compareTo(params[0]) == 0) {
                     in.close();
                     Server.semaphoreQuotesFile.release();
@@ -157,7 +164,8 @@ public class Helper {
         }
     }
 
-    protected static boolean checkUserVotedTheQuote(String quoteID, String userID) throws InterruptedException {
+    protected static String[] checkUserVotedTheQuote(String quoteID, String userID) throws InterruptedException {
+        String[] result = new String[2];
         try {
             Server.semaphoreVotesFile.acquire();
             Scanner in = new Scanner(new File(votesFileName));
@@ -166,17 +174,23 @@ public class Helper {
                 String[] params = line.trim().split(" ");
                 if (params[0].trim().compareTo(userID) == 0 && params[1].trim().compareTo(quoteID) == 0) {
                     in.close();
+                    result[0] = "1";
+                    result[1] = params[2].trim();
                     Server.semaphoreVotesFile.release();
-                    return true;
+                    return result;
                 }
             }
             Server.semaphoreVotesFile.release();
             in.close();
-            return false;
+            result[0] = "0";
+            result[1] = "";
+            return result;
         } catch (IOException e) {
             System.out.println(e);
             Server.semaphoreVotesFile.release();
-            return true;
+            result[0] = "0";
+            result[1] = "";
+            return result;
         }
 
     }
@@ -184,7 +198,7 @@ public class Helper {
     protected static void downvote_quote(String quoteID, String userID) throws Exception {
         if (checkQuoteExists(quoteID)) {
             if (checkUserExistsWithId(userID)) {
-                if (!checkUserVotedTheQuote(quoteID, userID)) {
+                if (checkUserVotedTheQuote(quoteID, userID)[0] == "0") {
                     try {
                         Server.semaphoreQuotesFile.acquire();
                         Scanner in = new Scanner(new File(quotesFileName));
@@ -248,7 +262,7 @@ public class Helper {
     protected static void upvote_quote(String quoteID, String userID) throws Exception {
         if (checkQuoteExists(quoteID)) {
             if (checkUserExistsWithId(userID)) {
-                if (!checkUserVotedTheQuote(quoteID, userID)) {
+                if (checkUserVotedTheQuote(quoteID, userID)[0] == "0") {
                     try {
                         Server.semaphoreQuotesFile.acquire();
                         Scanner in = new Scanner(new File(quotesFileName));
@@ -333,7 +347,8 @@ public class Helper {
         Server.semaphoreVotesFile.release();
         return votes;
     }
-        protected static String getUsernameWithId(String id) throws InterruptedException {
+
+    protected static String getUsernameWithId(String id) throws InterruptedException {
         try {
             Server.semaphoreUsersFile.acquire();
             Scanner in = new Scanner(new File(usersFileName));
@@ -352,6 +367,37 @@ public class Helper {
             System.out.println(e);
             Server.semaphoreUsersFile.release();
             return "";
+        }
+    }
+
+    protected static void add_quote(String quote, String userId) throws Exception {
+        try {
+            if (!checkUserExistsWithId(userId)) {
+                throw new Exception("User not found");
+            } else {
+                Server.semaphoreQuotesFile.acquire();
+                int numOfQuotes = 0;
+                Scanner in = new Scanner(new File(usersFileName));
+                while (in.hasNext()) {
+                    in.nextLine();
+                    numOfQuotes += 1;
+                }
+                in.close();
+                numOfQuotes++;
+                String username = getUsernameWithId(userId);
+                FileWriter fileWriter = new FileWriter(quotesFileName, true);
+                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter
+                        .write(numOfQuotes + "-----" + username + "-----" + quote + "-----" + "0" + "-----" + "0");
+                bufferedWriter.newLine();
+                bufferedWriter.close();
+                fileWriter.close();
+                Server.semaphoreUsersFile.release();
+            }
+
+        } catch (IOException e) {
+            System.out.println(e);
+            Server.semaphoreUsersFile.release();
         }
     }
 }
